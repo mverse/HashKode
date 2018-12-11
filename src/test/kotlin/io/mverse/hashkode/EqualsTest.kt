@@ -22,11 +22,22 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-object HashKode
+import io.kotlintest.matchers.shouldBe
+import io.kotlintest.matchers.shouldNotBe
+import io.kotlintest.specs.StringSpec
+
+class EqualsTest : StringSpec()
 {
-    var VERIFY_HASHKODE_PARAMETERS = true
-    var DEFAULT_INITIAL_ODD_NUMBER = 17
-    var DEFAULT_MULTIPLIER_PRIME = 37
+    init
+    {
+        "Equal objects are equal" {
+            BasicTester() shouldBe BasicTester()
+        }
+
+        "Different objects are not equal" {
+            BasicTester(f2 = 1.0) shouldNotBe BasicTester(f2 = 2.5)
+        }
+    }
 }

@@ -22,27 +22,30 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-interface HashKodeContext<out T>
+import io.kotlintest.matchers.shouldBe
+import io.kotlintest.matchers.shouldNotBe
+import io.kotlintest.specs.StringSpec
+
+class CombinedTest : StringSpec()
 {
-    /**
-     * Tests equality of two objects and saves result in context
-     * @receiver Object to compare another object to
-     * @param other to compare to receiver
-     * @see Any.equals
-     */
-    fun Any.correspondsTo(other: Any?)
+    init
+    {
+        "Hashcode is equal when objects are equal" {
+            val tester1 = BasicTester()
+            val tester2 = BasicTester()
 
-    /**
-     * Runs function
-     * @param comparison Function which should do a comparison of two fields
-     */
-    fun compareBy(comparison: () -> Boolean)
+            tester1.hashCode() shouldBe tester2.hashCode()
+            tester1 shouldBe tester2
+        }
 
-    /**
-     * Compares a field by using given getter lambda
-     * @param getter Getter for a field
-     */
-    fun compareField(getter: T.() -> Any?)
+        "Hashcode is different when objects are different" {
+            val tester1 = BasicTester(f2 = 1.0)
+            val tester2 = BasicTester(f2 = 2.5)
+
+            tester1.hashCode() shouldNotBe tester2.hashCode()
+            tester1 shouldNotBe tester2
+        }
+    }
 }

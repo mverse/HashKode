@@ -22,30 +22,38 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-import io.kotlintest.matchers.shouldBe
-import io.kotlintest.matchers.shouldNotBe
-import io.kotlintest.specs.StringSpec
-
-class CombinedTest : StringSpec()
+/**
+ * Generates a hashcode for given fields
+ * @param fields Fields to generate a hashcode from
+ * @param initialOddNumber Odd number to start with
+ * @param multiplierPrime Prime number to multiply hashes with
+ * @return Hashcode
+ * @see Any.hashCode
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline fun hashKode(
+        vararg fields: Any?,
+        initialOddNumber: Int = HashKode.DEFAULT_INITIAL_ODD_NUMBER,
+        multiplierPrime: Int = HashKode.DEFAULT_MULTIPLIER_PRIME): Int
 {
-    init
+    if (HashKode.VERIFY_HASHKODE_PARAMETERS &&
+            (initialOddNumber != HashKode.DEFAULT_INITIAL_ODD_NUMBER ||
+            multiplierPrime != HashKode.DEFAULT_MULTIPLIER_PRIME))
     {
-        "Hashcode is equal when objects are equal" {
-            val tester1 = BasicTester()
-            val tester2 = BasicTester()
-
-            tester1.hashCode() shouldBe tester2.hashCode()
-            tester1 shouldBe tester2
+        require(initialOddNumber % 2 != 0) {
+            "InitialOddNumber must be an odd number"
         }
-
-        "Hashcode is different when objects are different" {
-            val tester1 = BasicTester(f2 = 1.0)
-            val tester2 = BasicTester(f2 = 2.5)
-
-            tester1.hashCode() shouldNotBe tester2.hashCode()
-            tester1 shouldNotBe tester2
+        require(multiplierPrime > 1 && (2..(multiplierPrime / 2)).all { multiplierPrime % it != 0 }) {
+            "MultiplierPrime must be a prime number"
         }
     }
+
+    var result = initialOddNumber
+    fields.forEach { field ->
+        val hash = field?.hashCode() ?: 0
+        result = multiplierPrime * result + hash
+    }
+    return result
 }

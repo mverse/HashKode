@@ -22,15 +22,27 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-class BasicTester(val f1: String = "Test", val f2: Double = Math.PI)
+interface HashKodeContext<out T>
 {
-    override fun hashCode() = hashKode(f1, f2)
+    /**
+     * Tests equality of two objects and saves result in context
+     * @receiver Object to compare another object to
+     * @param other to compare to receiver
+     * @see Any.equals
+     */
+    fun Any.correspondsTo(other: Any?)
 
-    override fun equals(other: Any?) = compareFields(other)
-    {
-        compareField(BasicTester::f1)
-        compareField(BasicTester::f2)
-    }
+    /**
+     * Runs function
+     * @param comparison Function which should do a comparison of two fields
+     */
+    fun compareBy(comparison: () -> Boolean)
+
+    /**
+     * Compares a field by using given getter lambda
+     * @param getter Getter for a field
+     */
+    fun compareField(getter: T.() -> Any?)
 }

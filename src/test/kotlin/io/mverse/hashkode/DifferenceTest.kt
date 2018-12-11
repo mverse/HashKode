@@ -22,49 +22,35 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
 import io.kotlintest.matchers.shouldBe
-import io.kotlintest.matchers.shouldNotBe
-import io.kotlintest.matchers.shouldThrow
 import io.kotlintest.specs.StringSpec
 
-class HashingTest : StringSpec()
+class DifferenceTest : StringSpec()
 {
     init
     {
-        "Default arguments do not fail" {
-            hashKode()
-        }
+        "Difference check functions as predicted" {
+            val tester1 = BasicTester(f1 = "Hello")
+            val tester2 = BasicTester(f1 = "World")
 
-        "Even initial number fails" {
-            shouldThrow<IllegalArgumentException> {
-                hashKode(initialOddNumber = 4)
-            }
-        }
-
-        "Non prime number fails" {
-            shouldThrow<IllegalArgumentException> {
-                hashKode(multiplierPrime = 4)
-            }
-        }
-
-        "Hash is unique" {
-            hashKode("Test", 1, 2, 3) shouldNotBe hashKode(1, 2, 3, "Test")
-            hashKode(Any()) shouldNotBe hashKode(Any())
-        }
-
-        "Hash is consistent" {
-            with(Any())
+            val diff = tester1.getDifferences(tester2)
             {
-                hashKode(this) shouldBe hashKode(this)
+                compareField(BasicTester::f1)
             }
-            hashKode(BasicTester()) shouldBe hashKode(BasicTester())
-            hashKode(1, 2, 3) shouldBe hashKode(1, 2, 3)
-        }
 
-        "Hash can overflow" {
-            hashKode(Long.MAX_VALUE) shouldBe hashKode(Long.MAX_VALUE)
+            diff.size shouldBe 1
+            with (diff.first())
+            {
+                val (owner1, field1) = this.field1
+                (owner1 === tester1) shouldBe true
+                field1 shouldBe "Hello"
+
+                val (owner2, field2) = this.field2
+                (owner2 === tester2) shouldBe true
+                field2 shouldBe "World"
+            }
         }
     }
 }

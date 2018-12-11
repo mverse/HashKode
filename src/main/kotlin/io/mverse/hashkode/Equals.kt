@@ -22,22 +22,42 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-import io.kotlintest.matchers.shouldBe
-import io.kotlintest.matchers.shouldNotBe
-import io.kotlintest.specs.StringSpec
+@Suppress("OVERRIDE_BY_INLINE", "NOTHING_TO_INLINE")
+class EqualsContext<out T>(val one: T, val two: T) : HashKodeContext<T> {
+  var equal = true
 
-class EqualsTest : StringSpec()
-{
-    init
-    {
-        "Equal objects are equal" {
-            BasicTester() shouldBe BasicTester()
-        }
+  override inline infix fun Any.correspondsTo(other: Any?) {
+    if (equal) equal = this == other
+  }
 
-        "Different objects are not equal" {
-            BasicTester(f2 = 1.0) shouldNotBe BasicTester(f2 = 2.5)
-        }
-    }
+  override inline fun compareBy(comparison: () -> Boolean) {
+    if (equal) equal = comparison()
+  }
+
+  override inline fun compareField(getter: T.() -> Any?) {
+    if (equal) equal = one.getter() == two.getter()
+  }
+}
+
+/**
+ * Tests equality of two objects
+ * @receiver Object to compare another object to
+ * @param other Object to compare to receiver
+ * @param requirements Lambda that compares fields
+ * @return True when objects are equal
+ * @see Any.equals
+ */
+inline fun <reified T : Any> T.compareFields(
+    other: Any?,
+    requirements: EqualsContext<T>.() -> Unit
+): Boolean {
+  if (other == null) return false
+  if (other === this) return true
+  if (other !is T) return false
+
+  return EqualsContext(this, other)
+      .apply { requirements() }
+      .equal
 }

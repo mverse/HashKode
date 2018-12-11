@@ -22,35 +22,15 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-import io.kotlintest.matchers.shouldBe
-import io.kotlintest.specs.StringSpec
-
-class DifferenceTest : StringSpec()
+class BasicTester(val f1: String = "Test", val f2: Double = Math.PI)
 {
-    init
+    override fun hashCode() = hashKode(f1, f2)
+
+    override fun equals(other: Any?) = compareFields(other)
     {
-        "Difference check functions as predicted" {
-            val tester1 = BasicTester(f1 = "Hello")
-            val tester2 = BasicTester(f1 = "World")
-
-            val diff = tester1.getDifferences(tester2)
-            {
-                compareField(BasicTester::f1)
-            }
-
-            diff.size shouldBe 1
-            with (diff.first())
-            {
-                val (owner1, field1) = this.field1
-                (owner1 === tester1) shouldBe true
-                field1 shouldBe "Hello"
-
-                val (owner2, field2) = this.field2
-                (owner2 === tester2) shouldBe true
-                field2 shouldBe "World"
-            }
-        }
+        compareField(BasicTester::f1)
+        compareField(BasicTester::f2)
     }
 }

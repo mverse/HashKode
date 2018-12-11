@@ -22,38 +22,49 @@
  * SOFTWARE.
  */
 
-package nl.pvdberg.hashkode
+package io.mverse.hashkode
 
-/**
- * Generates a hashcode for given fields
- * @param fields Fields to generate a hashcode from
- * @param initialOddNumber Odd number to start with
- * @param multiplierPrime Prime number to multiply hashes with
- * @return Hashcode
- * @see Any.hashCode
- */
-@Suppress("NOTHING_TO_INLINE")
-inline fun hashKode(
-        vararg fields: Any?,
-        initialOddNumber: Int = HashKode.DEFAULT_INITIAL_ODD_NUMBER,
-        multiplierPrime: Int = HashKode.DEFAULT_MULTIPLIER_PRIME): Int
+import io.kotlintest.matchers.shouldBe
+import io.kotlintest.matchers.shouldNotBe
+import io.kotlintest.matchers.shouldThrow
+import io.kotlintest.specs.StringSpec
+
+class HashingTest : StringSpec()
 {
-    if (HashKode.VERIFY_HASHKODE_PARAMETERS &&
-            (initialOddNumber != HashKode.DEFAULT_INITIAL_ODD_NUMBER ||
-            multiplierPrime != HashKode.DEFAULT_MULTIPLIER_PRIME))
+    init
     {
-        require(initialOddNumber % 2 != 0) {
-            "InitialOddNumber must be an odd number"
+        "Default arguments do not fail" {
+            hashKode()
         }
-        require(multiplierPrime > 1 && (2..(multiplierPrime / 2)).all { multiplierPrime % it != 0 }) {
-            "MultiplierPrime must be a prime number"
-        }
-    }
 
-    var result = initialOddNumber
-    fields.forEach { field ->
-        val hash = field?.hashCode() ?: 0
-        result = multiplierPrime * result + hash
+        "Even initial number fails" {
+            shouldThrow<IllegalArgumentException> {
+                hashKode(initialOddNumber = 4)
+            }
+        }
+
+        "Non prime number fails" {
+            shouldThrow<IllegalArgumentException> {
+                hashKode(multiplierPrime = 4)
+            }
+        }
+
+        "Hash is unique" {
+            hashKode("Test", 1, 2, 3) shouldNotBe hashKode(1, 2, 3, "Test")
+            hashKode(Any()) shouldNotBe hashKode(Any())
+        }
+
+        "Hash is consistent" {
+            with(Any())
+            {
+                hashKode(this) shouldBe hashKode(this)
+            }
+            hashKode(BasicTester()) shouldBe hashKode(BasicTester())
+            hashKode(1, 2, 3) shouldBe hashKode(1, 2, 3)
+        }
+
+        "Hash can overflow" {
+            hashKode(Long.MAX_VALUE) shouldBe hashKode(Long.MAX_VALUE)
+        }
     }
-    return result
 }
